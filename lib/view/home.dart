@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/recipe_card.dart';
+import 'package:provider/provider.dart';
 
-import '../models/recipe.dart';
-import '../models/recipe_api.dart';
+import '../providers/recipe.dart';
+import '../providers/recipes.dart';
+
+import '../widgets/recipe_card.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -21,7 +23,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> getRecipes() async {
-    _recipes = await RecipeApi.getRecipe();
+    await Provider.of<Recipes>(context, listen: false).fetchAndSetRecipes();
     setState(() {
       _isLoading = false;
     });
@@ -29,6 +31,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    _recipes = Provider.of<Recipes>(context).recipes;
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -50,6 +53,7 @@ class _HomePageState extends State<HomePage> {
               itemCount: _recipes.length,
               itemBuilder: (ctx, i) {
                 return RecipeCard(
+                  id: _recipes[i].id,
                   title: _recipes[i].name,
                   cookTime: _recipes[i].totalTime,
                   rating: _recipes[i].rating.toString(),

@@ -1,10 +1,22 @@
+import 'package:flutter/material.dart';
 import 'dart:convert';
 
-import './recipe.dart';
 import 'package:http/http.dart' as http;
 
-class RecipeApi {
-  static Future<List<Recipe>> getRecipe() async {
+import './recipe.dart';
+
+class Recipes with ChangeNotifier {
+  List<Recipe> _recipes = [];
+
+  List<Recipe> get recipes {
+    return [..._recipes];
+  }
+
+  Recipe findById(String id) {
+    return _recipes.firstWhere((recipe) => recipe.id == id);
+  }
+
+  Future<void> fetchAndSetRecipes() async {
     var uri = Uri.https("yummly2.p.rapidapi.com", '/feeds/list', {
       "start": "0",
       "limit": "18",
@@ -18,9 +30,10 @@ class RecipeApi {
     Map data = json.decode(response.body);
     List _temp = [];
     for (var i in data['feed']) {
-      _temp.add(i['content']['details']);
+      _temp.add(i['content']);
     }
 
-    return Recipe.recipesFromSnapShot(_temp);
+    _recipes = Recipe.recipesFromSnapShot(_temp);
+    notifyListeners();
   }
 }
